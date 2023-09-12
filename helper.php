@@ -8,7 +8,7 @@
 		$newJpgFileName = $randomFileName.".jpg";
 		$newPngFileName = $randomFileName.".png";
 		$target_dir = "uploads/";
-		$target_file = $target_dir . $newJpgFileName;
+		$target_file = $target_dir . $newPngFileName;
 		$uploadOk = 1;
 		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
@@ -37,8 +37,8 @@
 		}
 
 		// Allow certain file formats
-		if($imageFileType != "jpg") {
-		  echo "Sorry, only JPG / JPEG Format is allowed.";
+		if($imageFileType != "png") {
+		  echo "Sorry, only PNG Format is allowed.";
 		  $uploadOk = 0;
 		}
 
@@ -49,14 +49,23 @@
 		} else {
 		  if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
 			//echo "The file ". htmlspecialchars( basename( $_FILES["fileToUpload"]["name"])). " has been uploaded.";
-				$filePath = "./uploads/".htmlspecialchars($newJpgFileName);
-				$fileDestinationPath = "./converted_files/".$newPngFileName;
-				
-				imagepng(imagecreatefromstring(file_get_contents($filePath)), $fileDestinationPath);
+				$filePath = "./uploads/".htmlspecialchars($newPngFileName);
+				$fileDestinationPath = "./converted_files/".$newJpgFileName;
+
+				$image = imagecreatefrompng($filePath);
+				$bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+				imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+				imagealphablending($bg, TRUE);
+				imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+				imagedestroy($image);
+				$quality = 50; // 0 = worst / smaller file, 100 = better / bigger file 
+				imagejpeg($bg, $fileDestinationPath, $quality);
+				imagedestroy($bg);
+					
 				
 				echo "<div><h3>Preview</h3></div>";
 				echo "<img src='".$fileDestinationPath."' style='width:300px; margin: 0 auto;' class='img-thumbnail'/><br/>";
-				echo "<a href='".$fileDestinationPath."' style='margin-top:10px;' class='btn btn-outline-success' role='button' download>Download Image in PNG</a>";
+				echo "<a href='".$fileDestinationPath."' style='margin-top:10px;' class='btn btn-outline-success' role='button' download>Download Image in JPG</a>";
 
 			
 		  } else {
